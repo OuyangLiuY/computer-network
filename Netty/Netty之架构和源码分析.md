@@ -673,44 +673,40 @@ public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
        public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
            ctx.fireChannelRegistered();
        }
-
-
-       public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
-           ctx.fireChannelUnregistered();
-       }
-    //通道就绪事件
-       public void channelActive(ChannelHandlerContext ctx) throws Exception {
-           ctx.fireChannelActive();
-       }
-    
-       public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-           ctx.fireChannelInactive();
-       }
-    //通道读取数据事件
-       public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-           ctx.fireChannelRead(msg);
-       }
-    //数据读取完毕事件
-       public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-           ctx.fireChannelReadComplete();
-       }
-    
-       public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-           ctx.fireUserEventTriggered(evt);
-       }
-    
-       public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
-           ctx.fireChannelWritabilityChanged();
-       }
-
-
-       public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-               throws Exception {
-           ctx.fireExceptionCaught(cause);
-       }
+        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
+          ctx.fireChannelUnregistered();
+      }
+   //通道就绪事件
+      public void channelActive(ChannelHandlerContext ctx) throws Exception {
+          ctx.fireChannelActive();
+      }
+   
+      public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+          ctx.fireChannelInactive();
+      }
+   //通道读取数据事件
+      public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
+          ctx.fireChannelRead(msg);
+      }
+   //数据读取完毕事件
+      public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
+          ctx.fireChannelReadComplete();
+      }
+   
+      public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+          ctx.fireUserEventTriggered(evt);
+      }
+   
+      public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
+          ctx.fireChannelWritabilityChanged();
+      }
+        public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+              throws Exception {
+          ctx.fireExceptionCaught(cause);
+      }
    }
 
-   ```
+
 
 ### Pipeline和ChannelPipeline
 
@@ -878,7 +874,9 @@ public class ThisIsServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 }
-   ```
+```
+
+
 
 ### WebSocket长连接案例:
 
@@ -1294,49 +1292,49 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
               protocol.setContent(bytes);
               ctx.writeAndFlush(protocol);
           }
+          @Override
+            public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
+                //cause.printStackTrace();
+                System.out.println(" 异常 " + cause.getMessage());
+                ctx.close();
+            }
+        }
 
 
 
-          @Override
-          public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-              //cause.printStackTrace();
-              System.out.println(" 异常 " + cause.getMessage());
-              ctx.close();
-          }
+  **messageToDecoder**
+
+```java
+public class TcpMessageToDecoder extends ReplayingDecoder<Void> {
+      @Override
+      protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
+          System.out.println("TcpMessageToDecoder 方法被掉用了");
+          int len = in.readInt();
+          byte[] content = new byte[len];
+          in.readBytes(content);
+          // 封装成MessageProtocol 对象,放入out,传递给下一个handler处理
+          MessageProtocol protocol = new MessageProtocol();
+          protocol.setLen(len);
+          protocol.setContent(content);
+          out.add(protocol);
       }
-      ```
-    
-      **messageToDecoder**
-    
-      ```java
-      public class TcpMessageToDecoder extends ReplayingDecoder<Void> {
-          @Override
-          protected void decode(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Exception {
-              System.out.println("TcpMessageToDecoder 方法被掉用了");
-              int len = in.readInt();
-              byte[] content = new byte[len];
-              in.readBytes(content);
-              // 封装成MessageProtocol 对象,放入out,传递给下一个handler处理
-              MessageProtocol protocol = new MessageProtocol();
-              protocol.setLen(len);
-              protocol.setContent(content);
-              out.add(protocol);
-          }
+  }
+```
+
+ **messageToEncoder**
+
+```java
+
+  public class TcpMessageToEncoder extends MessageToByteEncoder<MessageProtocol> {
+      @Override
+      protected void encode(ChannelHandlerContext ctx, MessageProtocol msg, ByteBuf out) throws Exception {
+          System.out.println("TcpMessageToEncoder  方法被调用了");
+          out.writeInt(msg.getLen());
+          out.writeBytes(msg.getContent());
       }
-      ```
-    
-      **messageToEncoder**
-    
-      ```java
-      public class TcpMessageToEncoder extends MessageToByteEncoder<MessageProtocol> {
-          @Override
-          protected void encode(ChannelHandlerContext ctx, MessageProtocol msg, ByteBuf out) throws Exception {
-              System.out.println("TcpMessageToEncoder  方法被调用了");
-              out.writeInt(msg.getLen());
-              out.writeBytes(msg.getContent());
-          }
-      }
-      ```
+  }
+
+```
 
 # Netty核心原理
 
@@ -1351,6 +1349,14 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
 **目的:** 用源码分析的方式走一下netty(服务器)的启动过程,更好的理解Netty的整体设计和运行机制
 
 ## 接受请求原理
+
+BossEventLoop 线程读取到感兴趣事件，比如：read到数据，
+
+将其注册到WorkerEventLoop，Worker里面的EventLoop进行执行，比如各种handler，并将其放入到Pipeline中，基于责任连模式进行调用。
+
+最后将处理之后的数据通过出站的outPutEventLoop Group 将数据放回。
+
+
 
 ## Pipeline源码剖析
 
