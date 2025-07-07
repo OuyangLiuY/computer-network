@@ -50,7 +50,7 @@
 1. 基于I/O复用模型:多个连接共用一个阻塞对象,应用程序只需要在一个阻塞对象等待,无需阻塞等待所有连接,当某个链接有新的数据可以处理时,操作系统通知应用程序,线程从阻塞状态返回,开始处理业务
 2. 基于线程池复用线程资源:不必再为每个连接创建线程,将连接完成后的业务处理任务分配给线程进行处理,一个线程可以处理多个连接的业务
 
-![reactor](../../images/netty/reactor.jpg)
+![reactor](../images/netty/reactor.jpg)
 
 **说明:**
 
@@ -75,7 +75,7 @@
 
 **工作原理示意图:**
 
-![reactor-单线程模型](../../images/netty/reactor-%E5%8D%95%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg)
+![reactor-单线程模型](../images/netty/reactor-%E5%8D%95%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg)
 
 **方案说明:**
 
@@ -98,7 +98,7 @@
 
 **工作原理图示意图:**
 
-![reactor-多线程模型](../../images/netty/reactor-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg)
+![reactor-多线程模型](../images/netty/reactor-%E5%A4%9A%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B.jpg)
 
 **方案说明**:
 
@@ -118,7 +118,7 @@
 
 **工作原理示意图:**
 
-![reactor-主从模型](../../images/netty/reactor-%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%9E%8B.jpg)
+![reactor-主从模型](../images/netty/reactor-%E4%B8%BB%E4%BB%8E%E6%A8%A1%E5%9E%8B.jpg)
 
 针对单Reactor多线程模型中,Reactor在单线程中运行,高并发场景下容易出现性能瓶颈,可以让Reactor在多线程中运行
 
@@ -147,7 +147,7 @@
 
 **工作原理示意图:**
 
-![netty-model-simple](../../images/netty/netty-model-simple.jpg)
+![netty-model-simple](../images/netty/netty-model-simple.jpg)
 
 **说明:**
 
@@ -161,13 +161,13 @@
 
 Netty主要基于从Reactors多线程模型(如图)做了一定的改进,其中主从Reactor多线程模型有多个Reactor
 
-![netty-model-middle](../../images/netty/netty-model-middle.jpg)
+![netty-model-middle](../images/netty/netty-model-middle.jpg)
 
 ### 详细模型:
 
 **工作原理示意图:**
 
-![netty-model](../../images/netty/netty-model.jpg)
+![netty-model](../images/netty/netty-model.jpg)
 
 **说明:**
 
@@ -631,7 +631,7 @@ public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
    - ChannelOutboundHandlerAdapter用于处理出站I/O操作
    - ChannelDeplexHandler用于处理入站和出站事件
 
-   ![ChannelHandler](../../images/netty/ChannelHandler.png)
+   ![ChannelHandler](../images/netty/ChannelHandler.png)
 4. 我们经常需要自定义一个Handler类去继承CHannelInboundHandlerAdapter,然后通过重写相应方法实现业务逻辑,
 
    ```java
@@ -651,9 +651,9 @@ public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
     * under the License.
     */
    package io.netty.channel;
-
+   
    import io.netty.channel.ChannelHandlerMask.Skip;
-
+   
    /**
     * Abstract base class for {@link ChannelInboundHandler} implementations which provide
     * implementations of all of their methods.
@@ -669,7 +669,7 @@ public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
     * </p>
     */
    public class ChannelInboundHandlerAdapter extends ChannelHandlerAdapter implements ChannelInboundHandler {
-
+   
        public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
            ctx.fireChannelRegistered();
        }
@@ -678,27 +678,27 @@ public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
        public void channelUnregistered(ChannelHandlerContext ctx) throws Exception {
            ctx.fireChannelUnregistered();
        }
-   	//通道就绪事件
+    //通道就绪事件
        public void channelActive(ChannelHandlerContext ctx) throws Exception {
            ctx.fireChannelActive();
        }
-
+    
        public void channelInactive(ChannelHandlerContext ctx) throws Exception {
            ctx.fireChannelInactive();
        }
-   	//通道读取数据事件
+    //通道读取数据事件
        public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
            ctx.fireChannelRead(msg);
        }
-   	//数据读取完毕事件
+    //数据读取完毕事件
        public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
            ctx.fireChannelReadComplete();
        }
-
+    
        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
            ctx.fireUserEventTriggered(evt);
        }
-
+    
        public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception {
            ctx.fireChannelWritabilityChanged();
        }
@@ -723,7 +723,7 @@ public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
    - 一个Channel包含了一个ChannelPipeline,而ChannelPipeline中又维护了一个由ChannelHandlerContext组成的双向链表,并且每个ChannelHandlerContext中又关联着一个ChannelHandler
    - 入站事件和出站事件在一个双向链表中,入站事件会从链表head往后传递到最后一个入站的handler,出站事件会从链表tail往前传递到最前一个出站的handler,两种类型的handler互不干扰
 
-   ![channelPipeline](../../images/netty/channelPipeline.jpg)
+   ![channelPipeline](../images/netty/channelPipeline.jpg)
 4. 常用方法
 
    - ChannelPipeline  addFirst(ChannelHandler ... handlers),把一个业务处理类(handler)添加到链中的第一个位置
@@ -758,7 +758,7 @@ public class TestServerInitializer extends ChannelInitializer<SocketChannel> {
 2. EventLoopGroup提供next接口,可以从组里面按照一定规则获取其中一个EventLoop来处理任务.在Netty服务端编程中,我们一般都需要提供两个EventLoopGroup,例如:BossEventLoopGroup和WorkerEventLoopGroup
 3. 通常一个服务端口即一个ServerSocketChannel对应一个Selector和一个EventLoop线程,BossEventLoop负责接收客户端的连接并将SocketChannel交给WorkerEventLoopGroup来进行IO处理,如下图所示:
 
-   ![image-20200923220054404](../../images/netty/EventLoopGroup.png)
+   ![image-20200923220054404](../images/netty/EventLoopGroup.png)
 
    - BossEventLoopGroup通常是一个单线程的EventLoop,EventLoop维护着一个注册了ServerSocketChannel的Selector实例BossEventLoop不断轮询Selector将连接事件分离出来
    - 通常是OP_ACCEPT事件,然后将接收到的SocketChannel交给WorkerEventLoopGroup
@@ -878,7 +878,7 @@ public class ThisIsServerHandler extends ChannelInboundHandlerAdapter {
         }
     }
 }
-```
+   ```
 
 ### WebSocket长连接案例:
 
@@ -1079,7 +1079,7 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
 
 1. 关系继承图
 
-   ![ByteToMessageDecoder](../../images/netty/ByteToMessageDecoder.png)
+   ![ByteToMessageDecoder](../images/netty/ByteToMessageDecoder.png)
 2. 由于不可能知道远程节点是否会一次性发送一个完整的信息,tcp有可能出现粘包拆包的问题,这个类会对入站数据进行的缓冲,直到它准备好被处理
 
 ## Netty的handler的调用机制
@@ -1091,7 +1091,7 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
 
    - **示意图:**
 
-     ![InboundAndOutbound](../../images/netty/InboundAndOutbound.jpg)
+     ![InboundAndOutbound](../images/netty/InboundAndOutbound.jpg)
    - **代码:**
 3. 案例代码:
 4. 结论:
@@ -1119,7 +1119,7 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
 
 **其他编码器**
 
-![messageToByteEncoderImpl](../../images/netty/messageToByteEncoderImpl.jpg)
+![messageToByteEncoderImpl](../images/netty/messageToByteEncoderImpl.jpg)
 
 ### Log4j整合到Netty
 
@@ -1165,7 +1165,7 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
 2. 由于TCP無消息保护边界,需要在接受端处理消息边界问题,也就是我们所说的粘包,拆包问题
 3. TCP粘包,拆包图解
 
-   ![TCP粘包-拆包](../../images/netty/TCP%E7%B2%98%E5%8C%85-%E6%8B%86%E5%8C%85.jpg)
+   ![TCP粘包-拆包](../images/netty/TCP%E7%B2%98%E5%8C%85-%E6%8B%86%E5%8C%85.jpg)
 4. 假设客户端分别发送两个数据包D1和D2给服务器,由于服务端一次读取数据是不确定的,故存在一下四种情况:
 
    1. 服务端分两次读取到了两个独立的数据包,分别是D1和D2,没有粘包和拆包
@@ -1254,9 +1254,9 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
               System.out.println("客户断接收到数据 : " + new String(content,CharsetUtil.UTF_8));
               System.out.println("长度 = " + len);
               System.out.println("客户端接收到的数据量 = " + (++count));
-
+      
           }
-
+      
           @Override
           public void channelActive(ChannelHandlerContext ctx) throws Exception {
               for (int i = 0; i < 5; i++) {
@@ -1285,7 +1285,7 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
               System.out.println("服务器接收到数据 : " + new String(content,CharsetUtil.UTF_8));
               System.out.println("长度 = " + len);
               System.out.println("服务器接收到的数据量 = " + (++count));
-
+      
               //服务器回送数据给客户端,回送一个随机数据
               String string = UUID.randomUUID().toString();
               byte[] bytes = string.getBytes(CharsetUtil.UTF_8);
@@ -1305,9 +1305,9 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
           }
       }
       ```
-
+    
       **messageToDecoder**
-
+    
       ```java
       public class TcpMessageToDecoder extends ReplayingDecoder<Void> {
           @Override
@@ -1324,9 +1324,9 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
           }
       }
       ```
-
+    
       **messageToEncoder**
-
+    
       ```java
       public class TcpMessageToEncoder extends MessageToByteEncoder<MessageProtocol> {
           @Override
@@ -1380,7 +1380,7 @@ public class MyTextWebSocketFrameHandler extends SimpleChannelInboundHandler<Tex
 
 RPC调用流程图
 
-![RPC调用流程](../../images/netty/RPC%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B.jpg)
+![RPC调用流程](../images/netty/RPC%E8%B0%83%E7%94%A8%E6%B5%81%E7%A8%8B.jpg)
 
 **术语说明:** 在RPC中,Client叫服务消费者,Server叫服务提供者
 
